@@ -14,6 +14,7 @@ fn imgdiff(d1: &GrayImage, d2: &GrayImage) -> usize {
 
 use image::*;
 use rayon::prelude::*;
+use std::collections::HashMap;
 fn main() {
     let mut alphabet =
         image::open("alphabet.png")
@@ -25,19 +26,22 @@ fn main() {
         chars.push(alphabet.sub_image(i*20,0, 20, 40).to_image());
     }
 
-    for nn in 30..=3092 {
+    let range = 30u64..3092+1;
+    let files: HashMap<u64, (String, Vec<String>)> =
+    range.clone().into_par_iter().map(|nn| {
         let fname = format!("shots/{:04}.png", nn);
-        println!("new file!!!! {}", fname);
         eprintln!("new file!!!! {}", fname);
         let mut input =
-            image::open(fname)
+            image::open(&fname)
             .expect("can't open input")
             .to_luma();
+        let mut rows = Vec::new();
         for y in 0..=26 {
             let mut row = String::new();
             for x in 0..72 {
                 let ch = input.sub_image(269+x*20,y*40,20,40).to_image();
 
+                /*
                 let (minc, _) = chars
                     .par_iter().enumerate()
                     .map(|(i, alc)| (i, imgdiff(&ch, alc)))
@@ -45,7 +49,7 @@ fn main() {
                         if p.1 < c.1 { p }
                         else { c }
                     });
-                /*
+                */
                 let mut minc = 0;
                 let mut mind = 9999999;
                 for (i, alc) in chars.iter().enumerate() {
@@ -55,11 +59,18 @@ fn main() {
                         mind = d;
                     }
                 }
-                */
 
                 let res = alpha_chars[minc];
                 row.push(res);
             }
+            rows.push(row);
+        }
+        return (nn, (fname, rows));
+    }).collect();
+    for k in range {
+        let &(ref fname, ref rows) = &files[&k];
+        println!("new file!!!! {}", fname);
+        for row in rows {
             println!("{}", row);
         }
     }
