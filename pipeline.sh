@@ -1,6 +1,8 @@
 
 # this is how the pipile works, roughly
 set -e
+echo "you shouldn't run this file, it's not meant to be ran" && exit 1
+youtube-dl.exe https://www.twitch.tv/videos/302423092 -o full_stream.mp4
 ffmpeg -i full_stream.mp4 -vf fps=1/10 shots/%04d.png
 cd dec
 cargo build --release
