@@ -1,10 +1,10 @@
 extern crate image;
 extern crate rayon;
-fn imgdiff(d1: &GrayImage, d2: &GrayImage) -> usize {
+fn imgdiff(d1: &[u8], d2: &[u8]) -> usize {
     let mut d = 0;
-    for (p1, p2) in d1.enumerate_pixels().zip(d2.enumerate_pixels()) {
-        let p1 = p1.2.data[0] as isize;
-        let p2 = p2.2.data[0] as isize;
+    for (p1, p2) in d1.iter().zip(d2.iter()) {
+        let p1 = *p1 as isize;
+        let p2 = *p2 as isize;
         d += ((p1-p2).abs() / 128) as usize;
     }
     return d;
@@ -19,15 +19,15 @@ fn main() {
         .expect("no alphabet.png")
         .to_luma();
     let alpha_chars: Vec<char> = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/ ".chars().collect();
-    let mut chars = Vec::<GrayImage>::new();
+    let mut chars = Vec::<Vec<u8>>::new();
     for i in 0..65 {
-        chars.push(alphabet.sub_image(i*20,0, 20, 40).to_image());
+        chars.push(alphabet.sub_image(i*20,0, 20, 40).to_image().into_raw());
     }
 
     let range = 30u64..3092+1;
     let files: HashMap<u64, (String, String)> =
     range.clone().into_par_iter().map(|nn| {
-        let fname = format!("shots/{:04}.png", nn);
+        let fname = format!("f:/cyberpunk/{:04}.png", nn);
         eprintln!("new file!!!! {}", fname);
         let mut input =
             image::open(&fname)
@@ -37,7 +37,7 @@ fn main() {
         for y in 0..=26 {
             let mut row = String::new();
             for x in 0..72 {
-                let ch = input.sub_image(269+x*20,y*40,20,40).to_image();
+                let ch = input.sub_image(269+x*20,y*40,20,40).to_image().into_raw();
 
                 /*
                 let (minc, _) = chars
