@@ -27,7 +27,7 @@ fn main() {
     let range = 30u64..3092+1;
     let files: HashMap<u64, (String, String)> =
     range.clone().into_par_iter().map(|nn| {
-        let fname = format!("f:/cyberpunk/{:04}.png", nn);
+        let fname = format!("shots/{:04}.png", nn);
         eprintln!("new file!!!! {}", fname);
         let mut input =
             image::open(&fname)
