@@ -5,9 +5,7 @@ fn imgdiff(d1: &GrayImage, d2: &GrayImage) -> usize {
     for (p1, p2) in d1.enumerate_pixels().zip(d2.enumerate_pixels()) {
         let p1 = p1.2.data[0] as isize;
         let p2 = p2.2.data[0] as isize;
-        if (p1-p2).abs() > 128 {
-            d += 1;
-        }
+        d += ((p1-p2).abs() / 128) as usize;
     }
     return d;
 }
@@ -27,7 +25,7 @@ fn main() {
     }
 
     let range = 30u64..3092+1;
-    let files: HashMap<u64, (String, Vec<String>)> =
+    let files: HashMap<u64, (String, String)> =
     range.clone().into_par_iter().map(|nn| {
         let fname = format!("shots/{:04}.png", nn);
         eprintln!("new file!!!! {}", fname);
@@ -35,7 +33,7 @@ fn main() {
             image::open(&fname)
             .expect("can't open input")
             .to_luma();
-        let mut rows = Vec::new();
+        let mut rows = String::new();
         for y in 0..=26 {
             let mut row = String::new();
             for x in 0..72 {
@@ -63,15 +61,14 @@ fn main() {
                 let res = alpha_chars[minc];
                 row.push(res);
             }
-            rows.push(row);
+            rows += &row;
+            rows.push('\n');
         }
         return (nn, (fname, rows));
     }).collect();
     for k in range {
         let &(ref fname, ref rows) = &files[&k];
         println!("new file!!!! {}", fname);
-        for row in rows {
-            println!("{}", row);
-        }
+        print!("{}", rows);
     }
 }
